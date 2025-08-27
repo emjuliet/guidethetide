@@ -75,17 +75,22 @@ export default function BookingForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [card, setCard] = useState<any>(null)
   const [showPayment, setShowPayment] = useState(false)
+  const [reservationId, setReservationId] = useState<string | null>(null)
+  const [reservationTimer, setReservationTimer] = useState<number>(0)
+  const [timerInterval, setTimerInterval] = useState<NodeJS.Timeout | null>(null)
 
   // Load Square Web Payments SDK
   useEffect(() => {
     const script = document.createElement('script')
-    script.src = 'https://sandbox-web.squarecdn.com/v1/square.js' // Use production URL for live
+    script.src = 'https://sandbox-web.squarecdn.com/v1/square.js'
     script.async = true
     script.onload = initializeSquare
     document.head.appendChild(script)
 
     return () => {
-      document.head.removeChild(script)
+      if (document.head.contains(script)) {
+        document.head.removeChild(script)
+      }
     }
   }, [])
 
@@ -111,16 +116,19 @@ export default function BookingForm() {
     calculatePricing()
   }, [bookingData])
 
+  // Cleanup timer on component unmount
+  useEffect(() => {
+    return () => {
+      if (timerInterval) clearInterval(timerInterval)
+    }
+  }, [timerInterval])
+
   const calculatePricing = () => {
     let basePrice = 0
     
     if (bookingData.service && services[bookingData.service as keyof typeof services]) {
       basePrice = services[bookingData.service as keyof typeof services].price
       
-      // Add extra person cost ($50 each additional person)
-      if (bookingData.people > 1) {
-        basePrice += (bookingData.people - 1) * 50
-      }
     }
 
     // Calculate addon costs
@@ -138,6 +146,40 @@ export default function BookingForm() {
       bookingFee: 50,
       total
     })
+  }
+
+  const startReservationTimer = () => {
+    setReservationTimer(15 * 60) // 15 minutes in seconds
+    
+    const interval = setInterval(() => {
+      setReservationTimer((prev) => {
+        if (prev <= 1) {
+          // Timer expired
+          clearInterval(interval)
+          alert('Your reservation has expired. Please start over.')
+          setShowPayment(false)
+          setReservationId(null)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    
+    setTimerInterval(interval)
+  }
+
+  const clearReservationTimer = () => {
+    if (timerInterval) {
+      clearInterval(timerInterval)
+      setTimerInterval(null)
+    }
+    setReservationTimer(0)
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   const handleInputChange = (field: keyof BookingData, value: any) => {
@@ -159,41 +201,128 @@ export default function BookingForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!showPayment) {
+      // First step: Check availability and create reservation
+      setIsLoading(true)
+      
+      try {
+        const checkResponse = await fetch('/api/check-availability', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: bookingData.date,
+            time: bookingData.time,
+            service: bookingData.service
+          })
+        })
+
+        const availabilityResult = await checkResponse.json()
+
+        if (checkResponse.ok && availabilityResult.available) {
+          // Create 15-minute reservation
+          const reserveResponse = await fetch('/api/create-reservation', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              bookingData,
+              pricing
+            })
+          })
+
+          const reservationResult = await reserveResponse.json()
+
+          if (reserveResponse.ok) {
+            // Store reservation ID and show payment form
+            setReservationId(reservationResult.reservationId)
+            setShowPayment(true)
+            
+            // Start 15-minute countdown timer
+            startReservationTimer()
+          } else {
+            throw new Error(reservationResult.error || 'Failed to reserve slot')
+          }
+        } else {
+          alert('Sorry, this time slot is no longer available. Please select a different time.')
+        }
+      } catch (error) {
+        console.error('Reservation error:', error)
+        alert('Unable to check availability. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+
+    // Second step: Process payment for existing reservation
+    if (!card) {
+      alert('Payment system not loaded. Please refresh and try again.')
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      // Here you would integrate with Square Web Payments SDK
-      // For now, we'll show a placeholder
+      // Tokenize card with Square
+      const tokenResult = await card.tokenize()
       
-      console.log('Booking Data:', bookingData)
-      console.log('Pricing:', pricing)
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      alert(`Booking submitted successfully!\n\nService: ${services[bookingData.service as keyof typeof services]?.name}\nTotal: $${pricing.total}\n\nIn production, this would process payment via Square and save to Supabase.`)
-      
-      // Reset form
-      setBookingData({
-        service: '',
-        people: 1,
-        date: '',
-        time: '6am',
-        name: '',
-        phone: '',
-        email: '',
-        notes: '',
-        addons: {
-          foodDrink: false,
-          videoClips: false,
-          highlightVideo: false,
-          cameraman: false
+      if (tokenResult.status === 'OK') {
+        // Convert reservation to confirmed booking with payment
+        const response = await fetch('/api/confirm-booking', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            reservationId,
+            paymentToken: tokenResult.token,
+            pricing
+          })
+        })
+
+        const result = await response.json()
+
+        if (response.ok) {
+          alert(`Booking confirmed! 
+          
+Payment processed: ${pricing.bookingFee}
+Confirmation details will be sent to ${bookingData.email}
+          
+Remaining balance: ${pricing.total - pricing.bookingFee} due at trip.`)
+          
+          // Reset form
+          setBookingData({
+            service: '',
+            people: 1,
+            date: '',
+            time: '6am',
+            name: '',
+            phone: '',
+            email: '',
+            notes: '',
+            addons: {
+              foodDrink: false,
+              videoClips: false,
+              highlightVideo: false,
+              cameraman: false
+            }
+          })
+          setShowPayment(false)
+          setReservationId(null)
+          clearReservationTimer()
+        } else {
+          throw new Error(result.error || 'Payment failed')
         }
-      })
-      
+      } else {
+        throw new Error('Card tokenization failed: ' + tokenResult.errors?.map((e: any) => e.message).join(', '))
+      }
     } catch (error) {
-      console.error('Booking error:', error)
-      alert('There was an error processing your booking. Please try again.')
+      console.error('Payment error:', error)
+      alert('Payment failed: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -244,14 +373,14 @@ export default function BookingForm() {
                   value={bookingData.service}
                   onChange={(e) => handleInputChange('service', e.target.value)}
                   required
-                  className="w-full p-3 rounded-xl bg-white/10 border-2 border-cyan-300/30 text-white placeholder-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent"
+                  className="w-full p-3 rounded-xl bg-white/10 border-2 border-cyan-300/30 text-white placeholder-cyan-100 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
                 >
-                  <option value="">Select a service</option>
-                  <option value="freshwater">Freshwater Fishing - $150</option>
-                  <option value="saltwater">Saltwater Fishing - $150</option>
-                  <option value="beach-diving">Beach Diving - $150</option>
-                  <option value="boat-fishing">Boat Fishing - $150</option>
-                  <option value="boat-spearfishing">Boat Spearfishing - $150</option>
+                  <option value="" className="bg-slate-800 text-white">Select a service</option>
+                  <option value="freshwater" className="bg-slate-800 text-white">Freshwater Fishing - $150</option>
+                  <option value="saltwater" className="bg-slate-800 text-white">Saltwater Fishing - $150</option>
+                  <option value="beach-diving" className="bg-slate-800 text-white">Beach Diving - $150</option>
+                  <option value="boat-fishing" className="bg-slate-800 text-white">Boat Fishing - $150</option>
+                  <option value="boat-spearfishing" className="bg-slate-800 text-white">Boat Spearfishing - $150</option>
                 </select>
               </div>
 
@@ -263,12 +392,12 @@ export default function BookingForm() {
                   id="people"
                   value={bookingData.people}
                   onChange={(e) => handleInputChange('people', parseInt(e.target.value))}
-                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 [&>option]:bg-slate-800 [&>option]:text-white"
                 >
-                  <option value={1}>1 Person</option>
-                  <option value={2}>2 People</option>
-                  <option value={3}>3 People</option>
-                  <option value={4}>4 People</option>
+                  <option value={1} className="bg-slate-800 text-white">1 Person</option>
+                  <option value={2} className="bg-slate-800 text-white">2 People</option>
+                  <option value={3} className="bg-slate-800 text-white">3 People</option>
+                  <option value={4} className="bg-slate-800 text-white">4 People</option>
                 </select>
               </div>
             </div>
@@ -286,7 +415,7 @@ export default function BookingForm() {
                   onChange={(e) => handleInputChange('date', e.target.value)}
                   min={today}
                   required
-                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
 
@@ -298,12 +427,12 @@ export default function BookingForm() {
                   id="time"
                   value={bookingData.time}
                   onChange={(e) => handleInputChange('time', e.target.value)}
-                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 [&>option]:bg-slate-800 [&>option]:text-white"
                 >
-                  <option value="6am">6:00 AM</option>
-                  <option value="9am">9:00 AM</option>
-                  <option value="12pm">12:00 PM</option>
-                  <option value="3pm">3:00 PM</option>
+                  <option value="6am" className="bg-slate-800 text-white">6:00 AM</option>
+                  <option value="9am" className="bg-slate-800 text-white">9:00 AM</option>
+                  <option value="12pm" className="bg-slate-800 text-white">12:00 PM</option>
+                  <option value="3pm" className="bg-slate-800 text-white">3:00 PM</option>
                 </select>
               </div>
             </div>
@@ -317,7 +446,7 @@ export default function BookingForm() {
                     type="checkbox"
                     checked={bookingData.addons.foodDrink}
                     onChange={() => handleAddonChange('foodDrink')}
-                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-500"
+                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-cyan-500 focus:ring-cyan-500"
                   />
                   <span>Food & Drink Package (+$25 per person)</span>
                 </label>
@@ -327,7 +456,7 @@ export default function BookingForm() {
                     type="checkbox"
                     checked={bookingData.addons.videoClips}
                     onChange={() => handleAddonChange('videoClips')}
-                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-500"
+                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-cyan-500 focus:ring-cyan-500"
                   />
                   <span>Video Clips (+$50 per person)</span>
                 </label>
@@ -337,7 +466,7 @@ export default function BookingForm() {
                     type="checkbox"
                     checked={bookingData.addons.highlightVideo}
                     onChange={() => handleAddonChange('highlightVideo')}
-                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-500"
+                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-cyan-500 focus:ring-cyan-500"
                   />
                   <span>Highlight Video (+$100)</span>
                 </label>
@@ -347,7 +476,7 @@ export default function BookingForm() {
                     type="checkbox"
                     checked={bookingData.addons.cameraman}
                     onChange={() => handleAddonChange('cameraman')}
-                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-amber-500 focus:ring-amber-500"
+                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-cyan-500 focus:ring-cyan-500"
                   />
                   <span>Cameraman Package (+$200 per person)</span>
                 </label>
@@ -367,7 +496,7 @@ export default function BookingForm() {
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Your full name"
                   required
-                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
 
@@ -382,7 +511,7 @@ export default function BookingForm() {
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="(555) 123-4567"
                   required
-                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
             </div>
@@ -398,7 +527,7 @@ export default function BookingForm() {
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
 
@@ -412,9 +541,44 @@ export default function BookingForm() {
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 placeholder="Any special requests, experience level, or questions..."
                 rows={3}
-                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
+                className="w-full p-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
               />
             </div>
+
+            {/* Reservation Timer - Show when payment form is active */}
+            {showPayment && reservationTimer > 0 && (
+              <div className="bg-orange-500/20 border border-orange-400 rounded-xl p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-orange-100">
+                    Slot reserved for:
+                  </span>
+                  <span className="text-orange-200 font-bold text-lg">
+                    {formatTime(reservationTimer)}
+                  </span>
+                </div>
+                <p className="text-sm text-orange-200 mt-1">
+                  Complete payment to secure your booking
+                </p>
+              </div>
+            )}
+
+            {/* Square Payment Form - Only show after reservation is created */}
+            {showPayment && (
+              <div className="bg-white/5 rounded-2xl p-6 border border-white/20">
+                <h3 className="text-xl font-bold mb-4">Payment Information</h3>
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold mb-2">
+                    Card Details
+                  </label>
+                  <div id="card-container" className="bg-white/10 rounded-xl p-4 border border-white/20">
+                    {/* Square card form will be injected here */}
+                  </div>
+                </div>
+                <div className="text-sm text-cyan-100">
+                  Secure payment powered by Square
+                </div>
+              </div>
+            )}
 
             {/* Booking Summary */}
             <div className="bg-white/10 rounded-2xl p-6 border border-white/20">
@@ -460,7 +624,12 @@ export default function BookingForm() {
                   : 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 hover:shadow-2xl hover:transform hover:-translate-y-1'
               }`}
             >
-              {isLoading ? 'Processing...' : `Let's Go Fishing!`}
+              {isLoading 
+                ? 'Processing...' 
+                : showPayment 
+                  ? `Pay ${pricing.bookingFee} & Confirm Booking`
+                  : 'Check Availability & Reserve'
+              }
             </button>
           </form>
         </div>
