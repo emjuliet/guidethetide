@@ -446,7 +446,7 @@ export default function BookingForm() {
                 </div>
               </div>
               <p className="text-xs text-slate-300 mt-4">
-                *$50 booking fee applied to total. Remaining balance due upon arrival.
+                *$50 deposit is required for booking. Remaining balance due upon arrival.
               </p>
             </div>
 
@@ -460,7 +460,7 @@ export default function BookingForm() {
                   : 'bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 hover:shadow-2xl hover:transform hover:-translate-y-1'
               }`}
             >
-              {isLoading ? 'Processing...' : `Let's Go! Pay ${pricing.bookingFee} & Reserve 🎣`}
+              {isLoading ? 'Processing...' : `Let's Go Fishing!`}
             </button>
           </form>
         </div>

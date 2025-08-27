@@ -9,10 +9,10 @@ export default function Hero() {
   }
 
   return (
-    <section 
-      id="home" 
-      className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 text-white overflow-hidden pt-20 md:pt-0"
-    >
+      <section 
+        id="home" 
+        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 text-white overflow-hidden pt-8 sm:pt-12 md:pt-0"
+      >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -42,25 +42,25 @@ export default function Hero() {
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <div className="animate-fade-in-up">
           {/* Just the logo, bigger and more prominent */}
-          <div className="mb-8">
-            <img 
-              src="/guide-the-tide-logo.png" 
-              alt="Guide The Tide Logo" 
-              className="h-48 w-48 mx-auto mb-6"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                // Show text fallback instead
-                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-                if (fallback) fallback.style.display = 'block';
-              }}
-            />
-            {/* Text fallback if logo fails to load */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent" style={{display: 'none'}}>
-              GUIDE THE TIDE
-            </h1>
-          </div>
+          <div className="mb-2"> {/* reduced spacing under logo */}
+        <img 
+          src="/guide-the-tide-logo.png" 
+          alt="Guide The Tide Logo" 
+          className="h-72 w-56 sm:h-80 sm:w-64 md:h-96 md:w-72 lg:h-[28rem] lg:w-[22rem] mx-auto mb-3"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'block';
+          }}
+        />
+        {/* Text fallback if logo fails to load */}
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent hidden">
+          GUIDE THE TIDE
+        </h1>
+      </div>
+
           
-          <p className="text-xl md:text-2xl mb-8 text-slate-200 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl mb-6 text-slate-200 max-w-3xl mx-auto leading-relaxed">
             Hey! I'm Anthony, and I've been obsessed with fishing since I was 5. Ready to explore South Florida's 
             incredible waters together? From peacock bass adventures to epic spearfishing dives!
           </p>
@@ -81,21 +81,7 @@ export default function Hero() {
             </button>
           </div>
 
-          {/* Trust indicators */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-cyan-400">17</div>
-              <div className="text-slate-400">Years Fishing</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-cyan-400">100%</div>
-              <div className="text-slate-400">Passion</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-cyan-400">Growing</div>
-              <div className="text-slate-400">Team</div>
-            </div>
-          </div>
+   
         </div>
       </div>
 
