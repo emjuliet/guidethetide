@@ -20,24 +20,23 @@ export default function About() {
               <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"></div>
             </div>
 
-            <div className="space-y-4 text-base sm:text-lg text-slate-600 leading-relaxed">
-              <p>
-                I've been completely hooked on fishing since I was 5 years old! At 22, I've turned my 
-                lifelong obsession into sharing South Florida's incredible fishing with others. 
-                There's nothing I love more than being on the water.
-              </p>
-              <p>
-                What makes my trips different? I'm not just about catching fish - I'm about creating 
-                <strong className="text-slate-900"> unforgettable experiences</strong>! Whether you're 
-                brand new to fishing or already experienced, I'll make sure you have an epic time and 
-                learn something new.
-              </p>
-              <p>
-                I'm building an amazing team of talented guides who share my passion for fishing and 
-                showing people the best South Florida waters have to offer. Together, we're creating 
-                something special - authentic adventures that you'll never forget!
-              </p>
-            </div>
+                <div className="space-y-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+                <p>
+                    I grew up on these waters, and now I’m here to share them with you. South Florida is home to 
+                    some of the most exciting fishing in the world, from peacock bass in the canals to epic 
+                    saltwater and spearfishing adventures offshore.
+                </p>
+                <p>
+                    With Guide the Tide, every trip is about more than catching fish. It’s about creating 
+                    <strong className="text-slate-900"> unforgettable experiences</strong> — whether you’re 
+                    brand new to fishing or a seasoned angler looking for your next challenge.
+                </p>
+                <p>
+                    As our team grows, we remain dedicated to what matters most: safe, authentic, and 
+                    adventure-filled days on the water that you’ll remember long after the lines are reeled in.
+                </p>
+                </div>
+
 
             {/* Expertise Areas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 sm:pt-6">

@@ -42,11 +42,11 @@ export default function Hero() {
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <div className="animate-fade-in-up">
           {/* Just the logo, bigger and more prominent */}
-          <div className="mb-2"> {/* reduced spacing under logo */}
+          <div className="mb-1"> {/* reduced spacing under logo */}
         <img 
           src="/guide-the-tide-logo.png" 
           alt="Guide The Tide Logo" 
-          className="h-72 w-56 sm:h-80 sm:w-64 md:h-96 md:w-72 lg:h-[28rem] lg:w-[22rem] mx-auto mb-3"
+          className="h-72 w-56 sm:h-80 sm:w-64 md:h-96 md:w-72 lg:h-[28rem] lg:w-[22rem] mx-auto mb-1"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
             const fallback = e.currentTarget.nextElementSibling as HTMLElement;
@@ -60,9 +60,9 @@ export default function Hero() {
       </div>
 
           
-          <p className="text-xl md:text-2xl mb-6 text-slate-200 max-w-3xl mx-auto leading-relaxed">
-            Hey! I'm Anthony, and I've been obsessed with fishing since I was 5. Ready to explore South Florida's 
-            incredible waters together? From peacock bass adventures to epic spearfishing dives!
+          <p className="text-xl md:text-2xl mb-2 text-slate-200 max-w-3xl mx-auto leading-relaxed">
+         Guide the Tide offers unforgettable fishing and diving experiences across South Florida. From chasing peacock bass in freshwater canals to offshore boat trips and spearfishing dives, every adventure is 
+         tailored to your skill level and goals. We provide the gear, local knowledge, and guidance. You just show up ready for the water!
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
