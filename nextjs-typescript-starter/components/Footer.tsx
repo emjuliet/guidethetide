@@ -20,11 +20,10 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex justify-center md:justify-start items-center space-x-2">
-              <span className="text-2xl">🎣</span>
               <span className="text-xl font-bold">GUIDE THE TIDE</span>
             </div>
             <p className="text-slate-400 leading-relaxed">
-              Premier fishing charters in South Florida with Captain Anthony Fernandez. 
+              Premier fishing services in South Florida with Anthony Fernandez. 
               Experience the best freshwater, saltwater, and spearfishing adventures.
             </p>
             
@@ -49,7 +48,7 @@ export default function Footer() {
                 📞
               </a>
               <a
-                href="mailto:info@guidethetide.com"
+                href="mailto:guidethetide@gmail.com"
                 className="bg-slate-800 hover:bg-blue-600 p-3 rounded-lg transition-all duration-300 hover:-translate-y-1"
                 aria-label="Email us"
               >
@@ -81,8 +80,8 @@ export default function Footer() {
             <div className="flex flex-col items-center md:items-start space-y-4">
               <div className="flex items-center space-x-3">
                 <span className="text-amber-500">📧</span>
-                <a href="mailto:info@guidethetide.com" className="text-slate-400 hover:text-white">
-                  info@guidethetide.com
+                <a href="mailto:guidethetide@gmail.com" className="text-slate-400 hover:text-white">
+                   guidethetide@gmail.com
                 </a>
               </div>
               <div className="flex items-center space-x-3">
