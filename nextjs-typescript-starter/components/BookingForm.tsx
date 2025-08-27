@@ -402,7 +402,7 @@ export default function BookingForm() {
                 </div>
               </div>
               <p className="text-xs text-slate-300 mt-4">
-                *$50 booking fee applied to total. Remaining balance due upon arrival.
+                *$50 deposit required for booking. Remaining balance due upon arrival.
               </p>
             </div>
 

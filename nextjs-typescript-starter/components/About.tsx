@@ -1,8 +1,11 @@
 'use client'
 
 import { Fish, Waves, Target, BookOpen, Camera, MessageCircle, Users } from 'lucide-react'
+import { useState } from 'react'
 
 export default function About() {
+  const [imageError, setImageError] = useState(false)
+
   return (
     <section id="about" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,8 +95,18 @@ export default function About() {
             
             {/* Main Image/Avatar */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-3xl h-96 flex items-center justify-center text-white shadow-2xl border-4 border-cyan-200">
-                <Fish className="w-24 h-24" />
+              <div className="bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 rounded-3xl h-96 flex items-center justify-center text-white shadow-2xl border-4 border-cyan-200 overflow-hidden">
+                {!imageError ? (
+                  <img 
+                    src="/anthony-photo.jpg" 
+                    alt="Anthony Fernandez - Fishing Guide" 
+                    className="w-full h-full object-cover object-center rounded-2xl"
+                    style={{ objectPosition: 'center top' }}
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <Fish className="w-24 h-24" />
+                )}
               </div>
               
               {/* Floating Badge */}

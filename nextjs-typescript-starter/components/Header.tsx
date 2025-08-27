@@ -6,6 +6,7 @@ import Link from 'next/link'
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [logoError, setLogoError] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,7 +37,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-3">
               <span className="text-2xl">🎣</span>
               <span className="text-xl font-bold text-white">GUIDE THE TIDE</span>
             </Link>

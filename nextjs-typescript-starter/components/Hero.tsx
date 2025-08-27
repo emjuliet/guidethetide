@@ -11,7 +11,7 @@ export default function Hero() {
   return (
     <section 
       id="home" 
-      className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 text-white overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 text-white overflow-hidden pt-20 md:pt-0"
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
@@ -41,9 +41,24 @@ export default function Hero() {
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <div className="animate-fade-in-up">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
-            GUIDE THE TIDE
-          </h1>
+          {/* Just the logo, bigger and more prominent */}
+          <div className="mb-8">
+            <img 
+              src="/guide-the-tide-logo.png" 
+              alt="Guide The Tide Logo" 
+              className="h-48 w-48 mx-auto mb-6"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                // Show text fallback instead
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'block';
+              }}
+            />
+            {/* Text fallback if logo fails to load */}
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent" style={{display: 'none'}}>
+              GUIDE THE TIDE
+            </h1>
+          </div>
           
           <p className="text-xl md:text-2xl mb-8 text-slate-200 max-w-3xl mx-auto leading-relaxed">
             Hey! I'm Anthony, and I've been obsessed with fishing since I was 5. Ready to explore South Florida's 

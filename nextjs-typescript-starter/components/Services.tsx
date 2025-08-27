@@ -1,6 +1,6 @@
 'use client'
 
-import { Fish, Waves, Target, Ship, Camera, Utensils, Sparkles, Droplets } from 'lucide-react'
+import { Fish, Waves, Target, Ship, Camera, Utensils, Sparkles, Droplets, Palmtree, Anchor } from 'lucide-react'
 
 interface Service {
   id: string
@@ -43,7 +43,7 @@ const services: Service[] = [
   },
   {
     id: 'beach-diving',
-    icon: <Target className="w-12 h-12" />,
+    icon: <Palmtree className="w-12 h-12" />,
     title: 'Beach Diving',
     description: 'Spearfishing adventures targeting snapper, hogfish, grouper and more from the beach.',
     price: '$150',
@@ -71,7 +71,7 @@ const services: Service[] = [
   },
   {
     id: 'boat-spearfishing',
-    icon: <Target className="w-12 h-12" />,
+    icon: <Anchor className="w-12 h-12" />,
     title: 'Boat Spearfishing',
     description: 'Advanced spearfishing trips by boat to access the best underwater hunting spots.',
     price: '$150',
