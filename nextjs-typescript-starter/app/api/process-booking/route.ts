@@ -1,25 +1,20 @@
-import { NextResponse } from 'next/server'
-
-export async function POST() {
-  return NextResponse.json(
-    { message: 'Booking API not yet implemented' },
-    { status: 501 } // Not Implemented
-  )
-}
-
-
-/* 
 import { NextRequest, NextResponse } from 'next/server'
-import { Client, Environment } from 'squareup'
 import { randomUUID } from 'crypto'
 
-// Initialize Square client
-const squareClient = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment: process.env.SQUARE_ENVIRONMENT === 'production' 
-    ? Environment.Production 
-    : Environment.Sandbox
-})
+// Handle Square import issues in production
+let squareClient: any = null
+
+try {
+  // @ts-ignore
+  const { Client } = require('squareup')
+  
+  squareClient = new Client({
+    accessToken: process.env.SQUARE_ACCESS_TOKEN,
+    environment: process.env.SQUARE_ENVIRONMENT === 'production' ? 'production' : 'sandbox'
+  })
+} catch (error) {
+  console.warn('Square SDK not available:', error)
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -119,5 +114,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
- */
