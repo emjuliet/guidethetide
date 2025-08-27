@@ -1,3 +1,13 @@
+import { NextResponse } from 'next/server'
+
+export async function POST() {
+  return NextResponse.json(
+    { message: 'Booking API not yet implemented' },
+    { status: 501 } // Not Implemented
+  )
+}
+
+
 /* 
 import { NextRequest, NextResponse } from 'next/server'
 import { Client, Environment } from 'squareup'
