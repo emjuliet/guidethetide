@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Fish } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Header() {
@@ -38,7 +39,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-3">
-              <span className="text-2xl">🎣</span>
+              <Fish className="w-6 h-6 text-cyan-300" />
               <span className="text-xl font-bold text-white">GUIDE THE TIDE</span>
             </Link>
           </div>

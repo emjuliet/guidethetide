@@ -35,6 +35,18 @@ const services = {
   'boat-spearfishing': { name: 'Boat Spearfishing', price: 150 }
 }
 
+// Square Web Payments SDK types
+declare global {
+  interface Window {
+    Square?: {
+      payments: (appId: string, locationId: string) => {
+        card: () => Promise<any>
+        build: () => Promise<any>
+      }
+    }
+  }
+}
+
 export default function BookingForm() {
   const [bookingData, setBookingData] = useState<BookingData>({
     service: '',
@@ -61,6 +73,38 @@ export default function BookingForm() {
   })
 
   const [isLoading, setIsLoading] = useState(false)
+  const [card, setCard] = useState<any>(null)
+  const [showPayment, setShowPayment] = useState(false)
+
+  // Load Square Web Payments SDK
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://sandbox-web.squarecdn.com/v1/square.js' // Use production URL for live
+    script.async = true
+    script.onload = initializeSquare
+    document.head.appendChild(script)
+
+    return () => {
+      document.head.removeChild(script)
+    }
+  }, [])
+
+  const initializeSquare = async () => {
+    if (!window.Square) return
+
+    try {
+      const payments = window.Square.payments(
+        process.env.NEXT_PUBLIC_SQUARE_APP_ID || 'sandbox-sq0idb-your-app-id',
+        process.env.NEXT_PUBLIC_SQUARE_LOCATION_ID || 'sandbox-location-id'
+      )
+
+      const cardElement = await payments.card()
+      await cardElement.attach('#card-container')
+      setCard(cardElement)
+    } catch (error) {
+      console.error('Square initialization error:', error)
+    }
+  }
 
   // Calculate pricing whenever booking data changes
   useEffect(() => {
@@ -402,7 +446,7 @@ export default function BookingForm() {
                 </div>
               </div>
               <p className="text-xs text-slate-300 mt-4">
-                *$50 deposit required for booking. Remaining balance due upon arrival.
+                *$50 booking fee applied to total. Remaining balance due upon arrival.
               </p>
             </div>
 
