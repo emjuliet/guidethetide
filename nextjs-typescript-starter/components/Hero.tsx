@@ -9,10 +9,10 @@ export default function Hero() {
   }
 
   return (
-      <section 
-        id="home" 
-        className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 text-white overflow-hidden pt-8 sm:pt-12 md:pt-0"
-      >
+    <section 
+      id="home" 
+      className="relative min-h-screen flex flex-col justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 text-white overflow-hidden pt-16 pb-20 sm:pt-20 md:pt-0"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{
@@ -39,32 +39,35 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto flex-1 flex flex-col justify-center">
         <div className="animate-fade-in-up">
-          {/* Just the logo, bigger and more prominent */}
-          <div className="mb-2"> {/* reduced spacing under logo */}
-        <img 
-          src="/guide-the-tide-logo.png" 
-          alt="Guide The Tide Logo" 
-          className="h-72 w-56 sm:h-80 sm:w-64 md:h-96 md:w-72 lg:h-[28rem] lg:w-[22rem] mx-auto mb-2"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-            if (fallback) fallback.style.display = 'block';
-          }}
-        />
-        {/* Text fallback if logo fails to load */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent hidden">
-          GUIDE THE TIDE
-        </h1>
-      </div>
+          {/* Logo */}
+          <div className="mb-3">
+            <img 
+              src="/guide-the-tide-logo.png" 
+              alt="Guide The Tide Logo" 
+              className="h-64 w-52 sm:h-80 sm:w-64 md:h-96 md:w-72 lg:h-[28rem] lg:w-[22rem] mx-auto mb-4"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'block';
+              }}
+            />
+            {/* Text fallback if logo fails */}
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent hidden">
+              GUIDE THE TIDE
+            </h1>
+          </div>
 
-          
-          <p className="text-xl md:text-2xl mb-3 text-slate-200 max-w-3xl mx-auto leading-relaxed">
-         Guide the Tide offers unforgettable fishing and diving experiences across South Florida. From chasing peacock bass in freshwater canals to offshore boat trips and spearfishing dives, every adventure is 
-         tailored to your skill level and goals. We provide the gear, local knowledge, and guidance. You just show up ready for the water!
+          {/* Intro paragraph */}
+          <p className="text-lg sm:text-xl md:text-2xl mb-8 text-slate-200 max-w-3xl mx-auto leading-relaxed">
+            Guide the Tide offers unforgettable fishing and diving experiences across South Florida. 
+            From chasing peacock bass in freshwater canals to offshore boat trips and spearfishing dives, 
+            every adventure is tailored to your skill level and goals. We provide the gear, local knowledge, 
+            and guidance. You just show up ready for the water!
           </p>
 
+          {/* CTA buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={() => scrollToSection('booking')}
@@ -80,8 +83,6 @@ export default function Hero() {
               View Services
             </button>
           </div>
-
-   
         </div>
       </div>
 
